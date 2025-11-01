@@ -88,14 +88,24 @@ export const getActiveBroadcasts = async () => {
     return response.data;
 };
 
-// Auth APIs
+// Auth APIs - Registration
 export const sendEmailSignUpOtp = async (email) => {
-    const response = await api.post('/api/sendotp', { email });
+    const response = await api.post('/api/sendmailsms', { email });
+    return response;
+};
+
+export const sendPhoneSignUpOtp = async (contact) => {
+    const response = await api.post('/api/sendmailsms', { contact });
     return response;
 };
 
 export const confirmSignUpEmailOtp = async (email, otp) => {
     const response = await api.post('/api/verifyotpreg', { email, otp });
+    return response;
+};
+
+export const confirmSignUpPhoneOtp = async (contact, otp) => {
+    const response = await api.post('/api/verifyotpreg', { contact, otp });
     return response;
 };
 

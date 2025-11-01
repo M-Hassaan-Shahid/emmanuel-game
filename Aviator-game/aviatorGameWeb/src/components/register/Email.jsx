@@ -68,7 +68,8 @@ export default function Email() {
   };
 
   // Send Otp
-  const sendOtp = async () => {
+  const sendOtp = async (e) => {
+    e?.preventDefault();
     setLoading(true);
     try {
       const response = await sendEmailSignUpOtp(email);
@@ -117,7 +118,8 @@ export default function Email() {
     }
   };
   // confirm code
-  const handleConfirmCode = async () => {
+  const handleConfirmCode = async (e) => {
+    e?.preventDefault();
     setConfirmed(true);
     try {
       const response = await confirmSignUpEmailOtp(email, confirmCode);
@@ -221,6 +223,7 @@ export default function Email() {
                 onChange={(e) => setEmail(e.target.value)}
               />
               <button
+                type="button"
                 className="bg-sky-600 text-sm text-white px-4 hover:bg-sky-300 hover:text-sky-600"
                 onClick={sendOtp}
                 disabled={loading}
@@ -238,6 +241,7 @@ export default function Email() {
               onChange={(e) => setConfirmCode(e.target.value)}
             />
             <button
+              type="button"
               className={`${
                 confirmed ? "bg-green-300" : "bg-sky-300"
               } text-sm text-sky-600 px-4 hover:bg-sky-600 hover:text-white`}

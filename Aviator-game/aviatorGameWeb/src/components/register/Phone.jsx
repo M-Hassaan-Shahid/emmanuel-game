@@ -9,7 +9,7 @@ import currencyOptions from "./../../services/currencies.json";
 import Select from "react-select";
 import "./../../assets/styles/Register.css";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { sendPhoneSignUpOtp, confirmSignUpPhoneOtp } from "../../services/api";
 
 export default function Phone() {
   const [phone, setPhone] = useState();
@@ -32,7 +32,8 @@ export default function Phone() {
   };
 
   // Send SMS OTP
-  const sendSmsOtp = async () => {
+  const sendSmsOtp = async (e) => {
+    e?.preventDefault();
     if (!phone) {
       toast.error("Please enter phone number!");
       return;
@@ -40,10 +41,7 @@ export default function Phone() {
 
     setLoading(true);
     try {
-      const apiUrl = import.meta.env.VITE_APP_BACKEND_URL;
-      const response = await axios.post(`${apiUrl}/api/sendmailsms`, {
-        contact: phone,
-      });
+      const response = await sendPhoneSignUpOtp(phone);
 
       if (response.data) {
         toast.success("OTP sent to your phone!");
@@ -57,7 +55,8 @@ export default function Phone() {
   };
 
   // Verify OTP
-  const verifyOtp = async () => {
+  const verifyOtp = async (e) => {
+    e?.preventDefault();
     if (!otp) {
       toast.error("Please enter OTP!");
       return;
@@ -65,11 +64,7 @@ export default function Phone() {
 
     setLoading(true);
     try {
-      const apiUrl = import.meta.env.VITE_APP_BACKEND_URL;
-      const response = await axios.post(`${apiUrl}/api/verifyotpreg`, {
-        contact: phone,
-        otp: otp,
-      });
+      const response = await confirmSignUpPhoneOtp(phone, otp);
 
       if (response.data.message === "User verified successfully.") {
         toast.success("Phone verified successfully!");
@@ -101,8 +96,8 @@ export default function Phone() {
 
     setLoading(true);
     try {
-      const apiUrl = import.meta.env.VITE_APP_BACKEND_URL;
-      const response = await axios.post(`${apiUrl}/api/insertuser`, {
+      const { createUser } = await import("../../services/api");
+      const response = await createUser({
         contact: phone,
         password: password,
         currency: selectedCurrency.value,
@@ -163,6 +158,7 @@ export default function Phone() {
                 className="custom-phone-input"
               />
               <button
+                type="button"
                 className="bg-sky-600 text-sm text-white px-4 hover:bg-sky-300 hover:text-sky-600 disabled:opacity-50"
                 onClick={sendSmsOtp}
                 disabled={loading || isOtpSent}
@@ -181,6 +177,7 @@ export default function Phone() {
               disabled={!isOtpSent || isOtpVerified}
             />
             <button
+              type="button"
               className="bg-sky-300 text-sm text-sky-600 px-4 hover:bg-sky-600 hover:text-white disabled:opacity-50"
               onClick={verifyOtp}
               disabled={loading || !isOtpSent || isOtpVerified}
