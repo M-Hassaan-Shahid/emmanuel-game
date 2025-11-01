@@ -81,8 +81,9 @@ cd aviatorGameWeb
 # Install dependencies
 npm install
 
-# Configure environment variables (if .env exists)
-# Edit .env with backend URL
+# Configure environment variables
+copy .env.example .env
+# Edit .env with backend URL (default: http://localhost:8000)
 
 # Start the game interface
 npm run dev
@@ -102,11 +103,19 @@ Game Interface runs on: `http://localhost:5173`
 - `TWILIO_SID` & `TWILIO_AUTH_TOKEN` - SMS OTP service
 - `TELEGRAM_BOT_TOKEN` - Telegram bot for payments
 
-**Frontend (.env):**
+**Frontend Admin Panel (.env):**
 
 - `REACT_APP_API_URL` - Backend API URL (default: http://localhost:8000)
 
-See `backend/.env.example` for complete configuration options.
+**Game Web (.env):**
+
+- `VITE_APP_BACKEND_URL` - Backend API URL (default: http://localhost:8000)
+- `VITE_API_URL` - Backend API URL (default: http://localhost:8000)
+- `VITE_TELEGRAM_BOT_USERNAME` - Your Telegram bot username (optional)
+
+**Note:** The Game Web uses Vite and requires both `VITE_APP_BACKEND_URL` and `VITE_API_URL` for compatibility with different components. Both should point to the same backend URL.
+
+See `backend/.env.example` for complete backend configuration options.
 
 ## 📚 Documentation
 

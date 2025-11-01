@@ -5,9 +5,26 @@ export default function BetUserList() {
   const [betUsers, setBetUsers] = React.useState([]);
   const [activeTab, setActiveTab] = React.useState("all"); // 'all', 'my', 'top'
 
-  React.useEffect(() => {
-    // Listen for real-time bet updates from socket
+  // Fetch bet history from API
+  const fetchBetHistory = React.useCallback(async () => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/api/bets/recent?limit=50`);
+      const data = await response.json();
 
+      if (data.success && data.bets) {
+        setBetUsers(data.bets);
+      }
+    } catch (error) {
+      console.error("Error fetching bet history:", error);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    // Fetch initial bet history
+    fetchBetHistory();
+
+    // Listen for real-time bet updates from socket
     socket.on("bet_placed", (betData) => {
       setBetUsers((prev) => [betData, ...prev].slice(0, 50)); // Keep last 50 bets
     });
@@ -26,11 +43,33 @@ export default function BetUserList() {
       );
     });
 
+    // Refresh bet list when round ends (plane crashes)
+    socket.on("plane_crash", () => {
+      console.log("🔄 Round ended - Refreshing bet list");
+      setTimeout(() => {
+        fetchBetHistory();
+      }, 1000); // Wait 1 second for backend to process all bets
+    });
+
+    // Also refresh when new round starts
+    socket.on("betting_open", () => {
+      console.log("🎰 New round starting - Refreshing bet list");
+      fetchBetHistory();
+    });
+
+    // Periodic refresh every 10 seconds as backup
+    const intervalId = setInterval(() => {
+      fetchBetHistory();
+    }, 10000);
+
     return () => {
       socket.off("bet_placed");
       socket.off("bet_cashed_out");
+      socket.off("plane_crash");
+      socket.off("betting_open");
+      clearInterval(intervalId);
     };
-  }, []);
+  }, [fetchBetHistory]);
 
   const betUser =
     betUsers.length > 0

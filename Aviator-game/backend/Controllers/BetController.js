@@ -115,11 +115,49 @@ const deletebet = async (req, res) => {
         res.status(500).json({ success: false, message: "error fetching bet" });
     }
 }
+
+// Get recent bets for display in bet list
+const getRecentBets = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 50;
+
+        const bets = await Bet.find({ deleted_at: null })
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .populate('userId', 'username email')
+            .lean();
+
+        // Format bets for frontend
+        const formattedBets = bets.map(bet => ({
+            id: bet._id,
+            userId: bet.userId?._id,
+            username: bet.userId?.username || 'Anonymous',
+            bet: bet.bet_amount,
+            mult: bet.cashout_multiplier ? `${bet.cashout_multiplier.toFixed(2)}X` : '',
+            cashout: bet.winnings || '',
+            status: bet.status,
+            createdAt: bet.createdAt
+        }));
+
+        res.status(200).json({
+            success: true,
+            bets: formattedBets
+        });
+    } catch (error) {
+        console.error('❌ Error fetching recent bets:', error);
+        res.status(500).json({
+            success: false,
+            message: "Error fetching recent bets",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     insertbet,
     updatebet,
     getAllbet,
     getSinglebet,
     deletebet,
-
+    getRecentBets,
 }
